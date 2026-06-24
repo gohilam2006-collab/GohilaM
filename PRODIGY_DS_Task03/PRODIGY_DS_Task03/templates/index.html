@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — BankDT{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Dashboard</h1>
+    <p>Bank Marketing Campaign — Term Deposit Subscription Predictor</p>
+  </div>
+  <button class="btn btn-outline" onclick="retrain()">⟳ Retrain Model</button>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card accent-green">
+    <div class="stat-icon">🎯</div>
+    <div class="stat-value">{{ stats.accuracy }}%</div>
+    <div class="stat-label">Accuracy</div>
+  </div>
+  <div class="stat-card accent-blue">
+    <div class="stat-icon">📊</div>
+    <div class="stat-value">{{ stats.precision }}%</div>
+    <div class="stat-label">Precision</div>
+  </div>
+  <div class="stat-card accent-purple">
+    <div class="stat-icon">🔁</div>
+    <div class="stat-value">{{ stats.recall }}%</div>
+    <div class="stat-label">Recall</div>
+  </div>
+  <div class="stat-card accent-orange">
+    <div class="stat-icon">⚡</div>
+    <div class="stat-value">{{ stats.f1 }}%</div>
+    <div class="stat-label">F1 Score</div>
+  </div>
+</div>
+
+<!-- Model Info + Quick Links -->
+<div class="two-col">
+  <div class="card">
+    <div class="card-header">🌲 Model Details</div>
+    <div class="card-body">
+      <div class="info-row"><span class="info-key">Algorithm</span><span class="info-val">Decision Tree (CART)</span></div>
+      <div class="info-row"><span class="info-key">Criterion</span><span class="info-val">Gini Impurity</span></div>
+      <div class="info-row"><span class="info-key">Tree Depth</span><span class="info-val">{{ stats.tree_depth }}</span></div>
+      <div class="info-row"><span class="info-key">Leaf Nodes</span><span class="info-val">{{ stats.n_leaves }}</span></div>
+      <div class="info-row"><span class="info-key">Features</span><span class="info-val">{{ stats.n_features }}</span></div>
+      <div class="info-row"><span class="info-key">Training Samples</span><span class="info-val">{{ stats.n_samples }}</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">🚀 Quick Actions</div>
+    <div class="card-body quick-actions">
+      <a href="/predict" class="action-btn green">
+        <span class="action-icon">🔮</span>
+        <span>Predict Subscription</span>
+        <span class="action-arrow">→</span>
+      </a>
+      <a href="/visuals" class="action-btn blue">
+        <span class="action-icon">📈</span>
+        <span>View Visualizations</span>
+        <span class="action-arrow">→</span>
+      </a>
+      <a href="/data" class="action-btn purple">
+        <span class="action-icon">🗃️</span>
+        <span>Explore Dataset</span>
+        <span class="action-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- About Section -->
+<div class="card">
+  <div class="card-header">ℹ️ About This Project</div>
+  <div class="card-body about-grid">
+    <div class="about-item">
+      <div class="about-title">📌 Objective</div>
+      <p>Predict whether a bank customer will subscribe to a term deposit product based on demographic and behavioral data from marketing call campaigns.</p>
+    </div>
+    <div class="about-item">
+      <div class="about-title">📦 Dataset</div>
+      <p>UCI Bank Marketing Dataset — features include age, job, marital status, education, account balance, contact details, and campaign history.</p>
+    </div>
+    <div class="about-item">
+      <div class="about-title">🛠️ Tech Stack</div>
+      <p>Python · scikit-learn · pandas · matplotlib · seaborn · Flask · HTML/CSS/JS</p>
+    </div>
+    <div class="about-item">
+      <div class="about-title">🌳 Model</div>
+      <p>Decision Tree Classifier with Gini criterion, max depth 5, minimum sample constraints to prevent overfitting.</p>
+    </div>
+  </div>
+</div>
+
+<div id="retrain-toast" class="toast hidden">⟳ Retraining model...</div>
+
+{% endblock %}

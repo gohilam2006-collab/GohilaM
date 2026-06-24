@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Dataset — BankDT{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>🗃️ Dataset Explorer</h1>
+    <p>Raw Bank Marketing data — showing first 20 rows of {{ shape[0] }} total records</p>
+  </div>
+  <div class="badge-row">
+    <span class="badge badge-blue">{{ shape[0] }} rows</span>
+    <span class="badge badge-purple">{{ shape[1] }} columns</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📋 Column Descriptions</div>
+  <div class="card-body">
+    <div class="col-desc-grid">
+      <div class="col-desc"><b>age</b> — Customer age</div>
+      <div class="col-desc"><b>job</b> — Type of job</div>
+      <div class="col-desc"><b>marital</b> — Marital status</div>
+      <div class="col-desc"><b>education</b> — Education level</div>
+      <div class="col-desc"><b>default</b> — Credit in default?</div>
+      <div class="col-desc"><b>balance</b> — Avg yearly balance (€)</div>
+      <div class="col-desc"><b>housing</b> — Housing loan?</div>
+      <div class="col-desc"><b>loan</b> — Personal loan?</div>
+      <div class="col-desc"><b>contact</b> — Contact type</div>
+      <div class="col-desc"><b>day</b> — Last contact day</div>
+      <div class="col-desc"><b>month</b> — Last contact month</div>
+      <div class="col-desc"><b>duration</b> — Call duration (sec)</div>
+      <div class="col-desc"><b>campaign</b> — Contacts this campaign</div>
+      <div class="col-desc"><b>pdays</b> — Days since prev contact</div>
+      <div class="col-desc"><b>previous</b> — Previous contacts</div>
+      <div class="col-desc"><b>poutcome</b> — Prev campaign outcome</div>
+      <div class="col-desc target"><b>y</b> — 🎯 Target: subscribed?</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">📊 Data Preview (First 20 Rows)</div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          {% for col in cols %}
+          <th {% if col=='y' %}class="target-col"{% endif %}>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          {% for cell in row %}
+          <td {% if loop.last %}class="target-col {% if cell=='yes' %}yes-cell{% else %}no-cell{% endif %}"{% endif %}>{{ cell }}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

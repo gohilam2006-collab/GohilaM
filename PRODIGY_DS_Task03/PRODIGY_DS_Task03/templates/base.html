@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Bank Marketing DT{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="nav-icon">🌳</span>
+      <span class="nav-title">BankDT Classifier</span>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="nav-link {% if request.path=='/' %}active{% endif %}">Dashboard</a>
+      <a href="/predict" class="nav-link {% if request.path=='/predict' %}active{% endif %}">Predict</a>
+      <a href="/visuals" class="nav-link {% if request.path=='/visuals' %}active{% endif %}">Visuals</a>
+      <a href="/data" class="nav-link {% if request.path=='/data' %}active{% endif %}">Dataset</a>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p>Bank Marketing Decision Tree Classifier &nbsp;|&nbsp; Built with scikit-learn &amp; Flask</p>
+  </footer>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

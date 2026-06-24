@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Predict — BankDT{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>🔮 Predict Subscription</h1>
+    <p>Enter customer details to predict term deposit subscription likelihood</p>
+  </div>
+</div>
+
+{% if result and result.error %}
+<div class="alert alert-error">❌ Error: {{ result.error }}</div>
+{% endif %}
+
+{% if result and not result.error %}
+<div class="result-banner" style="border-color: {{ result.color }}; background: {{ result.color }}18;">
+  <div class="result-main">
+    <div class="result-label">{{ result.label }}</div>
+    <div class="result-probs">
+      <div class="prob-item">
+        <span class="prob-bar-wrap">
+          <span class="prob-bar prob-no" style="width: {{ result.prob_no }}%"></span>
+        </span>
+        <span class="prob-text">No: {{ result.prob_no }}%</span>
+      </div>
+      <div class="prob-item">
+        <span class="prob-bar-wrap">
+          <span class="prob-bar prob-yes" style="width: {{ result.prob_yes }}%"></span>
+        </span>
+        <span class="prob-text">Yes: {{ result.prob_yes }}%</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header">Customer Profile</div>
+  <form method="POST" action="/predict" class="predict-form">
+
+    <div class="form-section-title">👤 Demographics</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" name="age" value="35" min="18" max="95" required/>
+      </div>
+      <div class="form-group">
+        <label>Job</label>
+        <select name="job">
+          {% for j in ['admin.','blue-collar','entrepreneur','housemaid','management','retired','self-employed','services','student','technician','unemployed'] %}
+          <option value="{{ j }}" {% if j=='management' %}selected{% endif %}>{{ j }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Marital Status</label>
+        <select name="marital">
+          <option value="married" selected>Married</option>
+          <option value="single">Single</option>
+          <option value="divorced">Divorced</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Education</label>
+        <select name="education">
+          <option value="primary">Primary</option>
+          <option value="secondary" selected>Secondary</option>
+          <option value="tertiary">Tertiary</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section-title">💰 Financial</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Account Balance (€)</label>
+        <input type="number" name="balance" value="500"/>
+      </div>
+      <div class="form-group">
+        <label>Has Credit Default?</label>
+        <select name="default">
+          <option value="no" selected>No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Housing Loan?</label>
+        <select name="housing">
+          <option value="yes" selected>Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Personal Loan?</label>
+        <select name="loan">
+          <option value="no" selected>No</option>
+          <option value="yes">Yes</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section-title">📞 Campaign Contact</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Contact Type</label>
+        <select name="contact">
+          <option value="unknown" selected>Unknown</option>
+          <option value="cellular">Cellular</option>
+          <option value="telephone">Telephone</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Contact Day</label>
+        <input type="number" name="day" value="15" min="1" max="31"/>
+      </div>
+      <div class="form-group">
+        <label>Contact Month</label>
+        <select name="month">
+          {% for m in ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'] %}
+          <option value="{{ m }}" {% if m=='may' %}selected{% endif %}>{{ m|upper }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Call Duration (sec)</label>
+        <input type="number" name="duration" value="200" min="1"/>
+      </div>
+      <div class="form-group">
+        <label>Contacts This Campaign</label>
+        <input type="number" name="campaign" value="1" min="1"/>
+      </div>
+      <div class="form-group">
+        <label>Days Since Last Contact</label>
+        <input type="number" name="pdays" value="-1" min="-1" title="-1 means never contacted"/>
+      </div>
+      <div class="form-group">
+        <label>Previous Contacts</label>
+        <input type="number" name="previous" value="0" min="0"/>
+      </div>
+      <div class="form-group">
+        <label>Previous Campaign Outcome</label>
+        <select name="poutcome">
+          <option value="unknown" selected>Unknown</option>
+          <option value="success">Success</option>
+          <option value="failure">Failure</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">🔮 Predict Now</button>
+      <button type="reset" class="btn btn-outline">↺ Reset</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

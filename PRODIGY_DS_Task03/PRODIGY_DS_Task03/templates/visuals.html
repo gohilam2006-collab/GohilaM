@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Visuals — BankDT{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>📊 Visualizations</h1>
+    <p>Model performance charts and data analysis plots</p>
+  </div>
+</div>
+
+{% if not imgs %}
+<div class="alert alert-info">
+  No visuals found. Run <code>python main.py</code> or visit the Dashboard to auto-generate them.
+</div>
+{% else %}
+<div class="visuals-grid">
+  {% for img in imgs %}
+  <div class="visual-card" onclick="openModal('{{ url_for('visual_file', filename=img.file) }}', '{{ img.label }}')">
+    <div class="visual-img-wrap">
+      <img src="{{ url_for('visual_file', filename=img.file) }}" alt="{{ img.label }}" loading="lazy"/>
+      <div class="visual-overlay">🔍 Click to enlarge</div>
+    </div>
+    <div class="visual-label">{{ img.label }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Modal -->
+<div id="img-modal" class="modal hidden" onclick="closeModal()">
+  <div class="modal-inner" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modal-title"></div>
+    <img id="modal-img" src="" alt=""/>
+  </div>
+</div>
+
+<script>
+function openModal(src, title) {
+  document.getElementById('modal-img').src = src;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('img-modal').classList.remove('hidden');
+}
+function closeModal() {
+  document.getElementById('img-modal').classList.add('hidden');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+</script>
+{% endblock %}

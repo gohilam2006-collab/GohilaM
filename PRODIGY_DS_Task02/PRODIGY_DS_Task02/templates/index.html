@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Titanic EDA – PRODIGY DS Task-02</title>
+<style>
+  :root{--bg:#0f172a;--surface:#1e293b;--surface2:#263348;--border:#334155;
+    --accent:#6366f1;--green:#22c55e;--red:#ef4444;--amber:#f59e0b;
+    --text:#f1f5f9;--muted:#94a3b8;--radius:12px;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
+    min-height:100vh;}
+
+  /* NAV */
+  nav{background:var(--surface);border-bottom:1px solid var(--border);
+    padding:14px 32px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+  .nav-logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#a78bfa);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .nav-sub{color:var(--muted);font-size:.85rem;}
+
+  /* HERO STATS */
+  .hero{padding:36px 32px 24px;display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:22px 20px;}
+  .stat-value{font-size:2.1rem;font-weight:800;line-height:1;}
+  .stat-label{color:var(--muted);font-size:.82rem;margin-top:6px;text-transform:uppercase;letter-spacing:.05em;}
+  .stat-card.green .stat-value{color:var(--green);}
+  .stat-card.red .stat-value{color:var(--red);}
+  .stat-card.accent .stat-value{color:#a78bfa;}
+  .stat-card.amber .stat-value{color:var(--amber);}
+
+  /* TABS */
+  .tabs{padding:0 32px;display:flex;gap:4px;border-bottom:1px solid var(--border);}
+  .tab{padding:12px 20px;cursor:pointer;color:var(--muted);font-size:.9rem;font-weight:500;
+    border-bottom:2px solid transparent;transition:.2s;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+  /* PANELS */
+  .panel{display:none;padding:28px 32px;}
+  .panel.active{display:block;}
+
+  .section-title{font-size:1.15rem;font-weight:700;margin-bottom:6px;}
+  .section-sub{color:var(--muted);font-size:.85rem;margin-bottom:20px;}
+
+  /* CHARTS */
+  .chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(500px,1fr));gap:20px;}
+  .chart-card{background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:20px;}
+  .chart-card h3{font-size:.95rem;font-weight:600;color:var(--muted);margin-bottom:14px;
+    text-transform:uppercase;letter-spacing:.07em;}
+  .chart-card img{width:100%;border-radius:8px;}
+  .chart-placeholder{height:260px;display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:.9rem;gap:10px;}
+  .spinner{width:22px;height:22px;border:3px solid var(--border);
+    border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* CLEANING LOG */
+  .log-item{background:var(--surface2);border:1px solid var(--border);
+    border-radius:8px;padding:16px 18px;margin-bottom:12px;}
+  .log-step{font-weight:600;margin-bottom:6px;color:#a78bfa;}
+  .log-detail{font-size:.88rem;color:var(--muted);font-family:'Cascadia Code',monospace;
+    white-space:pre-wrap;word-break:break-word;}
+
+  /* DATA TABLE */
+  .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:.83rem;}
+  thead{background:var(--surface2);}
+  th{padding:10px 14px;text-align:left;color:var(--muted);font-weight:600;
+    text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+  td{padding:9px 14px;border-top:1px solid var(--border);white-space:nowrap;}
+  tr:hover td{background:var(--surface2);}
+  .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.75rem;font-weight:600;}
+  .badge-green{background:#14532d;color:#86efac;}
+  .badge-red{background:#450a0a;color:#fca5a5;}
+
+  /* INSIGHTS */
+  .insights-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+  .insight-card{background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:20px;}
+  .insight-card h4{font-size:.95rem;font-weight:700;margin-bottom:10px;color:#a78bfa;}
+  .insight-card p{font-size:.88rem;color:var(--muted);line-height:1.7;}
+  .insight-card .metric{font-size:1.6rem;font-weight:800;color:var(--text);margin:8px 0 4px;}
+
+  /* RESPONSIVE */
+  @media(max-width:700px){
+    .hero{padding:20px 16px;}
+    .tabs,.panel{padding-left:16px;padding-right:16px;}
+    .chart-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">🚢 Titanic EDA</span>
+  <span class="nav-sub">PRODIGY InfoTech – Data Science Task 02</span>
+</nav>
+
+<!-- Hero Stats -->
+<div class="hero">
+  <div class="stat-card">
+    <div class="stat-value">{{ stats.total_passengers }}</div>
+    <div class="stat-label">Total Passengers</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-value">{{ stats.survived }}</div>
+    <div class="stat-label">Survived</div>
+  </div>
+  <div class="stat-card red">
+    <div class="stat-value">{{ stats.died }}</div>
+    <div class="stat-label">Did Not Survive</div>
+  </div>
+  <div class="stat-card accent">
+    <div class="stat-value">{{ stats.survival_rate }}%</div>
+    <div class="stat-label">Survival Rate</div>
+  </div>
+  <div class="stat-card amber">
+    <div class="stat-value">{{ stats.avg_age }}</div>
+    <div class="stat-label">Avg Age (years)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">£{{ stats.avg_fare }}</div>
+    <div class="stat-label">Avg Fare</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('charts')">📊 Charts</div>
+  <div class="tab" onclick="switchTab('cleaning')">🧹 Data Cleaning</div>
+  <div class="tab" onclick="switchTab('data')">📋 Data Preview</div>
+  <div class="tab" onclick="switchTab('insights')">💡 Key Insights</div>
+</div>
+
+<!-- Charts Panel -->
+<div class="panel active" id="panel-charts">
+  <div class="section-title">Exploratory Data Analysis</div>
+  <div class="section-sub">Visual exploration of survival patterns across gender, age, class, and family size.</div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Gender vs Survival</h3>
+      <div class="chart-placeholder" id="img-gender-wrap">
+        <div class="spinner"></div><span>Loading…</span>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Age Distribution</h3>
+      <div class="chart-placeholder" id="img-age-wrap">
+        <div class="spinner"></div><span>Loading…</span>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Passenger Class Analysis</h3>
+      <div class="chart-placeholder" id="img-pclass-wrap">
+        <div class="spinner"></div><span>Loading…</span>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Correlation Heatmap</h3>
+      <div class="chart-placeholder" id="img-heatmap-wrap">
+        <div class="spinner"></div><span>Loading…</span>
+      </div>
+    </div>
+    <div class="chart-card" style="grid-column:1/-1">
+      <h3>Family Size &amp; Embarkation Port</h3>
+      <div class="chart-placeholder" id="img-family-wrap">
+        <div class="spinner"></div><span>Loading…</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cleaning Panel -->
+<div class="panel" id="panel-cleaning">
+  <div class="section-title">Data Cleaning Log</div>
+  <div class="section-sub">Steps taken to handle missing values and engineer features.</div>
+  <div id="cleaning-log-container"><div style="color:var(--muted)">Loading…</div></div>
+</div>
+
+<!-- Data Preview Panel -->
+<div class="panel" id="panel-data">
+  <div class="section-title">Dataset Preview</div>
+  <div class="section-sub">First 20 rows after cleaning and feature engineering.</div>
+  <div id="table-container"><div style="color:var(--muted)">Loading…</div></div>
+</div>
+
+<!-- Insights Panel -->
+<div class="panel" id="panel-insights">
+  <div class="section-title">Key Insights</div>
+  <div class="section-sub">Patterns and trends discovered through exploratory analysis.</div>
+  <div class="insights-grid">
+    <div class="insight-card">
+      <h4>👩 Gender Was the Strongest Predictor</h4>
+      <div class="metric">{{ stats.female_survival }}% <span style="font-size:1rem;color:var(--muted)">female survival</span></div>
+      <p>Female passengers survived at a rate of <strong>{{ stats.female_survival }}%</strong> compared to just <strong>{{ stats.male_survival }}%</strong> for males — a reflection of the "women and children first" evacuation policy.</p>
+    </div>
+    <div class="insight-card">
+      <h4>🎫 Class Determined Fate</h4>
+      <div class="metric">{{ stats.class1_survival }}% <span style="font-size:1rem;color:var(--muted)">1st class</span></div>
+      <p>First-class passengers had a <strong>{{ stats.class1_survival }}%</strong> survival rate vs only <strong>{{ stats.class3_survival }}%</strong> for 3rd class. Proximity to lifeboats and social priority played a decisive role.</p>
+    </div>
+    <div class="insight-card">
+      <h4>👶 Children Prioritised</h4>
+      <p>Passengers under 12 years old (Children group) had significantly higher survival rates. Age, combined with gender, was a key factor in determining who reached the lifeboats.</p>
+    </div>
+    <div class="insight-card">
+      <h4>👨‍👩‍👧 Optimal Family Size: 2–4</h4>
+      <p>Solo travellers and very large families (7+) had lower survival rates. Those with 2–4 family members fared best — possibly helping each other reach lifeboats while not being too large a group to coordinate.</p>
+    </div>
+    <div class="insight-card">
+      <h4>💰 Fare Correlates with Survival</h4>
+      <p>Higher fare passengers (strongly correlated with 1st class) had better survival outcomes. The median 1st-class fare was several times higher than 3rd class, and so was their survival rate.</p>
+    </div>
+    <div class="insight-card">
+      <h4>🚢 Embarkation Port Matters</h4>
+      <p>Cherbourg (C) passengers had the highest survival rate, likely because a higher proportion of 1st-class passengers boarded there. Southampton (S) had the largest number but lower survival rate due to more 3rd-class passengers.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const tabs = ['charts','cleaning','data','insights'];
+
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active', tabs[i]===id);
+  });
+  tabs.forEach(t=>{
+    document.getElementById('panel-'+t).classList.toggle('active',t===id);
+  });
+  if(id==='cleaning') loadCleaning();
+  if(id==='data') loadTable();
+}
+
+function loadChart(endpoint, wrapperId){
+  fetch(endpoint).then(r=>r.json()).then(d=>{
+    const w = document.getElementById(wrapperId);
+    w.innerHTML = `<img src="data:image/png;base64,${d.image}" alt="chart"/>`;
+  });
+}
+
+// Load all charts on page load
+loadChart('/api/chart/gender','img-gender-wrap');
+loadChart('/api/chart/age','img-age-wrap');
+loadChart('/api/chart/pclass','img-pclass-wrap');
+loadChart('/api/chart/heatmap','img-heatmap-wrap');
+loadChart('/api/chart/family','img-family-wrap');
+
+let cleaningLoaded=false;
+function loadCleaning(){
+  if(cleaningLoaded) return;
+  cleaningLoaded=true;
+  fetch('/api/cleaning-log').then(r=>r.json()).then(log=>{
+    const c=document.getElementById('cleaning-log-container');
+    c.innerHTML=log.map(item=>`
+      <div class="log-item">
+        <div class="log-step">${item.step}</div>
+        <div class="log-detail">${typeof item.detail==='object'?JSON.stringify(item.detail,null,2):item.detail}</div>
+      </div>`).join('');
+  });
+}
+
+let tableLoaded=false;
+function loadTable(){
+  if(tableLoaded) return;
+  tableLoaded=true;
+  fetch('/api/data-preview').then(r=>r.json()).then(d=>{
+    const cols=d.columns;
+    const rows=d.rows;
+    const thead=`<thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>`;
+    const tbody=`<tbody>${rows.map(row=>`<tr>${cols.map(c=>{
+      let val=row[c];
+      if(c==='Survived') return `<td><span class="badge ${val==1?'badge-green':'badge-red'}">${val==1?'Survived':'Died'}</span></td>`;
+      if(val===null||val===undefined) return `<td style="color:var(--muted)">—</td>`;
+      if(typeof val==='number') return `<td>${Number.isInteger(val)?val:val.toFixed(2)}</td>`;
+      return `<td>${val}</td>`;
+    }).join('')}</tr>`).join('')}</tbody>`;
+    document.getElementById('table-container').innerHTML=
+      `<div class="table-wrap"><table>${thead}${tbody}</table></div>
+       <p style="margin-top:12px;font-size:.82rem;color:var(--muted)">Showing first 20 rows · ${rows.length} total loaded</p>`;
+  });
+}
+</script>
+</body>
+</html>

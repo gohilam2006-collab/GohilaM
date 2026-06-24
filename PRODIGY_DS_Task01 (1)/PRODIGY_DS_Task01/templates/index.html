@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PRODIGY DS Task 01 – Distribution Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg0:   #0B1120;
+      --bg1:   #0F172A;
+      --bg2:   #1E293B;
+      --bg3:   #334155;
+      --text1: #F1F5F9;
+      --text2: #CBD5E1;
+      --text3: #94A3B8;
+      --blue:  #2563EB;
+      --violet:#7C3AED;
+      --amber: #F59E0B;
+      --green: #10B981;
+      --red:   #EF4444;
+      --cyan:  #06B6D4;
+      --border:#1E293B;
+      --radius:12px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg0);
+      color: var(--text1);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Top bar ──────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #0B1120 0%, #1a1040 50%, #0B1120 100%);
+      border-bottom: 1px solid var(--bg3);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    .logo {
+      display: flex; align-items: center; gap: .75rem;
+      font-weight: 700; font-size: 1.1rem; color: var(--text1);
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--blue), var(--violet));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .badge {
+      background: var(--bg2); color: var(--text3);
+      font-size: .7rem; padding: 3px 8px; border-radius: 20px;
+      border: 1px solid var(--bg3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Layout ───────────────────────────────────── */
+    .shell {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+
+    /* ── Sidebar ──────────────────────────────────── */
+    .sidebar {
+      background: var(--bg1);
+      border-right: 1px solid var(--bg2);
+      padding: 1.5rem 1.25rem;
+      display: flex; flex-direction: column; gap: 1.5rem;
+      overflow-y: auto;
+    }
+    .sidebar h3 {
+      font-size: .65rem; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--text3);
+      margin-bottom: .5rem;
+    }
+
+    /* stats cards */
+    .stat-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .6rem;
+    }
+    .stat-card {
+      background: var(--bg2); border-radius: 10px;
+      padding: .75rem .9rem;
+    }
+    .stat-card .val { font-size: 1.4rem; font-weight: 700; color: var(--text1); }
+    .stat-card .lbl { font-size: .7rem; color: var(--text3); margin-top: 2px; }
+
+    /* form controls */
+    .ctrl-group { display: flex; flex-direction: column; gap: .5rem; }
+    label { font-size: .8rem; color: var(--text2); font-weight: 500; }
+    select, input[type=range], input[type=number] {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--bg3);
+      color: var(--text1);
+      border-radius: 8px;
+      padding: .45rem .75rem;
+      font-size: .85rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    select:focus, input:focus { border-color: var(--blue); }
+    option { background: var(--bg2); }
+
+    .range-row { display: flex; align-items: center; gap: .6rem; }
+    input[type=range] {
+      padding: 0; height: 6px; accent-color: var(--blue);
+    }
+    .range-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .8rem; color: var(--amber);
+      min-width: 28px; text-align: right;
+    }
+
+    /* chart type pills */
+    .pill-group { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .pill {
+      padding: .35rem .75rem; border-radius: 20px;
+      font-size: .75rem; font-weight: 500;
+      background: var(--bg2); color: var(--text3);
+      border: 1px solid var(--bg3);
+      cursor: pointer; transition: all .2s;
+      user-select: none;
+    }
+    .pill:hover { border-color: var(--blue); color: var(--text1); }
+    .pill.active {
+      background: var(--blue); color: #fff;
+      border-color: var(--blue);
+    }
+
+    /* color swatches */
+    .swatch-group { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .swatch {
+      width: 26px; height: 26px; border-radius: 6px;
+      border: 2px solid transparent; cursor: pointer;
+      transition: transform .15s, border-color .15s;
+    }
+    .swatch:hover { transform: scale(1.15); }
+    .swatch.active { border-color: #fff; }
+
+    /* buttons */
+    .btn {
+      padding: .55rem 1.1rem; border-radius: 8px;
+      font-size: .85rem; font-weight: 600;
+      cursor: pointer; border: none;
+      transition: opacity .2s, transform .1s;
+      font-family: inherit;
+    }
+    .btn:hover { opacity: .85; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--blue); color: #fff; width: 100%; }
+    .btn-outline {
+      background: transparent; color: var(--text2);
+      border: 1px solid var(--bg3); width: 100%;
+    }
+    .btn-outline:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── Main area ───────────────────────────────── */
+    .main {
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* tabs */
+    .tabs {
+      display: flex; gap: 0;
+      border-bottom: 1px solid var(--bg2);
+      background: var(--bg1);
+      padding: 0 1.5rem;
+    }
+    .tab {
+      padding: .85rem 1.25rem;
+      font-size: .85rem; font-weight: 500;
+      color: var(--text3); cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+      user-select: none;
+    }
+    .tab:hover { color: var(--text1); }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+    .tab-panel { display: none; padding: 1.5rem; flex: 1; }
+    .tab-panel.active { display: block; }
+
+    /* chart card */
+    .chart-card {
+      background: var(--bg1); border: 1px solid var(--bg2);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .chart-header {
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--bg2);
+    }
+    .chart-title { font-weight: 600; font-size: .95rem; }
+    .chart-body { padding: 1rem; min-height: 380px; display: flex; align-items: center; justify-content: center; }
+    .chart-body img { max-width: 100%; border-radius: 8px; }
+
+    /* placeholder */
+    .placeholder {
+      text-align: center; color: var(--text3);
+      display: flex; flex-direction: column; align-items: center; gap: .75rem;
+    }
+    .placeholder svg { opacity: .25; }
+
+    /* spinner */
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--bg3);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* stats panel */
+    .stats-panel {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: .75rem; margin-top: 1rem;
+    }
+    .stats-panel .stat-card { background: var(--bg2); }
+    .stats-panel .stat-card .val { font-size: 1.1rem; }
+
+    /* table */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+    th, td {
+      padding: .55rem .85rem; text-align: left;
+      border-bottom: 1px solid var(--bg2);
+    }
+    th { color: var(--text3); font-weight: 600; font-size: .7rem;
+         text-transform: uppercase; letter-spacing: .08em; background: var(--bg2); }
+    tr:hover td { background: var(--bg2); }
+    td { color: var(--text2); font-family: 'JetBrains Mono', monospace; }
+
+    /* toast */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: var(--green); color: #fff;
+      padding: .65rem 1.1rem; border-radius: 8px;
+      font-size: .85rem; font-weight: 600;
+      opacity: 0; transform: translateY(12px);
+      transition: opacity .3s, transform .3s;
+      pointer-events: none; z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* responsive */
+    @media (max-width: 800px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { border-right: none; border-bottom: 1px solid var(--bg2); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <div class="logo-icon">📊</div>
+    PRODIGY DS Task 01
+  </a>
+  <span class="badge">Distribution Visualizer</span>
+</header>
+
+<div class="shell">
+
+  <!-- ── Sidebar ─────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <div>
+      <h3>Dataset Summary</h3>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="val">{{ summary.total_rows }}</div>
+          <div class="lbl">Rows</div>
+        </div>
+        <div class="stat-card">
+          <div class="val">{{ summary.total_cols }}</div>
+          <div class="lbl">Columns</div>
+        </div>
+        <div class="stat-card">
+          <div class="val">{{ summary.missing }}</div>
+          <div class="lbl">Missing</div>
+        </div>
+        {% if summary.survived_pct %}
+        <div class="stat-card">
+          <div class="val">{{ summary.survived_pct }}%</div>
+          <div class="lbl">Survived</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div>
+      <h3>Column</h3>
+      <div class="ctrl-group">
+        <select id="sel-column">
+          <optgroup label="Categorical">
+            {% for c in summary.categorical_cols %}
+            <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </optgroup>
+          <optgroup label="Numeric">
+            {% for c in summary.numeric_cols %}
+            <option value="{{ c }}" {% if c=='Age' %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </optgroup>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <h3>Chart Type</h3>
+      <div class="pill-group" id="pill-group">
+        <div class="pill active" data-val="histogram">Histogram</div>
+        <div class="pill" data-val="bar">Bar</div>
+        <div class="pill" data-val="pie">Pie</div>
+        <div class="pill" data-val="box">Box</div>
+        <div class="pill" data-val="violin">Violin</div>
+      </div>
+    </div>
+
+    <div id="bins-section">
+      <h3>Bins (histogram)</h3>
+      <div class="ctrl-group">
+        <div class="range-row">
+          <input type="range" id="range-bins" min="5" max="50" value="15">
+          <span class="range-val" id="bins-val">15</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3>Accent Color</h3>
+      <div class="swatch-group" id="swatch-group">
+        <div class="swatch active" data-color="#2563EB" style="background:#2563EB"></div>
+        <div class="swatch" data-color="#7C3AED" style="background:#7C3AED"></div>
+        <div class="swatch" data-color="#F59E0B" style="background:#F59E0B"></div>
+        <div class="swatch" data-color="#10B981" style="background:#10B981"></div>
+        <div class="swatch" data-color="#EF4444" style="background:#EF4444"></div>
+        <div class="swatch" data-color="#06B6D4" style="background:#06B6D4"></div>
+        <div class="swatch" data-color="#EC4899" style="background:#EC4899"></div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btn-generate">Generate Chart</button>
+    <button class="btn btn-outline" id="btn-save">💾 Save to outputs/</button>
+
+  </aside>
+
+  <!-- ── Main ───────────────────────────────────── -->
+  <main class="main">
+
+    <nav class="tabs">
+      <div class="tab active" data-tab="chart">Chart</div>
+      <div class="tab" data-tab="stats">Column Stats</div>
+      <div class="tab" data-tab="preview">Data Preview</div>
+    </nav>
+
+    <!-- Chart panel -->
+    <div class="tab-panel active" id="panel-chart">
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title" id="chart-title">Age — Histogram</span>
+          <span class="badge" id="chart-badge">ready</span>
+        </div>
+        <div class="chart-body" id="chart-body">
+          <div class="placeholder">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/>
+              <rect x="17" y="3" width="4" height="18"/><line x1="3" y1="3" x2="3" y2="21"/>
+              <line x1="3" y1="21" x2="21" y2="21"/>
+            </svg>
+            <p>Select a column and click <strong>Generate Chart</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats panel -->
+    <div class="tab-panel" id="panel-stats">
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title">Column Statistics</span>
+          <button class="btn btn-outline" style="width:auto;padding:.3rem .8rem;font-size:.75rem"
+                  onclick="loadStats()">Refresh</button>
+        </div>
+        <div style="padding:1rem" id="stats-content">
+          <p style="color:var(--text3);font-size:.85rem">Select a column and click Refresh.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview panel -->
+    <div class="tab-panel" id="panel-preview">
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title">Data Preview (first 10 rows)</span>
+          <span class="badge" id="preview-badge">—</span>
+        </div>
+        <div style="padding:1rem" id="preview-content">
+          <p style="color:var(--text3);font-size:.85rem">Loading…</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast">Chart saved to outputs/ ✓</div>
+
+<script>
+  /* ── State ──────────────────────────────── */
+  let chartType = 'histogram';
+  let accentColor = '#2563EB';
+
+  /* ── Helpers ────────────────────────────── */
+  const $ = id => document.getElementById(id);
+
+  function showToast(msg = 'Done ✓') {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  /* ── Tabs ───────────────────────────────── */
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      $('panel-' + tab.dataset.tab).classList.add('active');
+      if (tab.dataset.tab === 'preview') loadPreview();
+    });
+  });
+
+  /* ── Pill group (chart type) ────────────── */
+  document.querySelectorAll('.pill').forEach(p => {
+    p.addEventListener('click', () => {
+      document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      chartType = p.dataset.val;
+      $('bins-section').style.display = chartType === 'histogram' ? 'block' : 'none';
+    });
+  });
+
+  /* ── Swatches ───────────────────────────── */
+  document.querySelectorAll('.swatch').forEach(s => {
+    s.addEventListener('click', () => {
+      document.querySelectorAll('.swatch').forEach(x => x.classList.remove('active'));
+      s.classList.add('active');
+      accentColor = s.dataset.color;
+    });
+  });
+
+  /* ── Bins slider ────────────────────────── */
+  $('range-bins').addEventListener('input', e => {
+    $('bins-val').textContent = e.target.value;
+  });
+
+  /* ── Generate chart ─────────────────────── */
+  async function generateChart(save = false) {
+    const col = $('sel-column').value;
+    const bins = +$('range-bins').value;
+
+    $('chart-title').textContent = `${col} — ${chartType}`;
+    $('chart-badge').textContent = 'loading…';
+    $('chart-body').innerHTML = '<div class="spinner"></div>';
+
+    const res = await fetch('/api/chart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ column: col, chart_type: chartType, bins, color: accentColor, save })
+    });
+    const data = await res.json();
+
+    if (data.error) {
+      $('chart-body').innerHTML = `<div class="placeholder"><p style="color:var(--red)">${data.error}</p></div>`;
+      $('chart-badge').textContent = 'error';
+      return;
+    }
+
+    $('chart-body').innerHTML = `<img src="data:image/png;base64,${data.image}" alt="chart">`;
+    $('chart-badge').textContent = 'done';
+    if (save) showToast('Chart saved to outputs/ ✓');
+  }
+
+  $('btn-generate').addEventListener('click', () => generateChart(false));
+  $('btn-save').addEventListener('click', () => generateChart(true));
+
+  /* ── Column stats ───────────────────────── */
+  async function loadStats() {
+    const col = $('sel-column').value;
+    $('stats-content').innerHTML = '<div class="spinner" style="margin:1rem auto"></div>';
+
+    const res = await fetch('/api/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ column: col })
+    });
+    const d = await res.json();
+
+    let html = `<p style="color:var(--text3);font-size:.75rem;margin-bottom:.75rem">
+                  Column: <strong style="color:var(--amber)">${col}</strong>
+                  &nbsp;·&nbsp; Type: <strong style="color:var(--cyan)">${d.type}</strong>
+                </p>`;
+
+    if (d.type === 'numeric') {
+      const items = [
+        ['Count', d.count], ['Missing', d.missing], ['Mean', d.mean],
+        ['Median', d.median], ['Std Dev', d.std],
+        ['Min', d.min], ['Max', d.max], ['Q25', d.q25], ['Q75', d.q75],
+      ];
+      html += '<div class="stats-panel">';
+      items.forEach(([l, v]) => {
+        html += `<div class="stat-card"><div class="val">${v ?? '—'}</div><div class="lbl">${l}</div></div>`;
+      });
+      html += '</div>';
+    } else {
+      html += `<div class="stats-panel">
+        <div class="stat-card"><div class="val">${d.count}</div><div class="lbl">Count</div></div>
+        <div class="stat-card"><div class="val">${d.missing}</div><div class="lbl">Missing</div></div>
+        <div class="stat-card"><div class="val">${d.unique}</div><div class="lbl">Unique</div></div>
+        <div class="stat-card"><div class="val">${d.top ?? '—'}</div><div class="lbl">Top Value</div></div>
+      </div>`;
+      // value counts bar
+      const vc = d.value_counts;
+      const maxV = Math.max(...Object.values(vc));
+      html += '<div style="margin-top:1rem">';
+      html += '<h3 style="font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:.6rem">Value Counts</h3>';
+      Object.entries(vc).forEach(([k, v], i) => {
+        const colors = ['#2563EB','#7C3AED','#F59E0B','#10B981','#EF4444','#06B6D4','#EC4899','#84CC16','#F97316','#8B5CF6'];
+        const pct = (v / maxV * 100).toFixed(1);
+        html += `<div style="margin-bottom:.45rem">
+          <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.2rem">
+            <span style="color:var(--text2)">${k}</span>
+            <span style="color:var(--text3);font-family:'JetBrains Mono',monospace">${v}</span>
+          </div>
+          <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${colors[i%colors.length]};border-radius:4px;transition:width .5s"></div>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    }
+    $('stats-content').innerHTML = html;
+  }
+
+  /* ── Preview table ──────────────────────── */
+  async function loadPreview() {
+    const res = await fetch('/api/preview');
+    const data = await res.json();
+
+    $('preview-badge').textContent = `${data.rows.length} rows shown`;
+    let html = '<div class="table-wrap"><table><thead><tr>';
+    data.columns.forEach(c => { html += `<th>${c}</th>`; });
+    html += '</tr></thead><tbody>';
+    data.rows.forEach(row => {
+      html += '<tr>';
+      data.columns.forEach(c => { html += `<td>${row[c] ?? ''}</td>`; });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    $('preview-content').innerHTML = html;
+  }
+
+  /* ── Auto-load on start ─────────────────── */
+  window.addEventListener('DOMContentLoaded', () => {
+    // trigger default chart after a tick
+    setTimeout(() => generateChart(false), 300);
+  });
+</script>
+</body>
+</html>
