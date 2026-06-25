@@ -1,0 +1,10 @@
+{
+  "accuracy": 0.72,
+  "total_samples": 50,
+  "positive_accuracy": 0.8333,
+  "positive_count": 18,
+  "negative_accuracy": 0.8824,
+  "negative_count": 17,
+  "neutral_accuracy": 0.4,
+  "neutral_count": 15
+}

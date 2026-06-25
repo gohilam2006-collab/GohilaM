@@ -1,0 +1,51 @@
+textID,text,sentiment,platform,entity,timestamp,user,likes,retweets,country,hashtags
+1,"I love this product! It's absolutely amazing and has changed my life #bestpurchase",Positive,Twitter,TechBrand,2024-01-15 08:23:00,user_101,245,67,USA,#bestpurchase
+2,"Terrible customer service. Waited 3 hours and got no help. Never buying again.",Negative,Twitter,TechBrand,2024-01-15 09:10:00,user_102,12,8,UK,
+3,"Just tried the new app update. Pretty decent, nothing special though.",Neutral,Twitter,TechBrand,2024-01-15 10:45:00,user_103,5,2,India,
+4,"OMG this is the best thing ever! Totally obsessed!! #amazing #love",Positive,Twitter,FashionBrand,2024-01-15 11:00:00,user_104,512,130,USA,#amazing #love
+5,"Disappointed with the quality. Expected much better for this price.",Negative,Facebook,FashionBrand,2024-01-15 12:30:00,user_105,8,0,Canada,
+6,"The new collection is stunning! Absolutely beautiful designs 😍 #fashion",Positive,Instagram,FashionBrand,2024-01-15 13:15:00,user_106,890,0,Australia,#fashion
+7,"Package arrived damaged. Customer service was unhelpful. 1 star!",Negative,Twitter,TechBrand,2024-01-15 14:00:00,user_107,34,19,USA,
+8,"Neutral opinion on the brand. It's okay I guess.",Neutral,Facebook,TechBrand,2024-01-15 14:45:00,user_108,3,1,Germany,
+9,"Fantastic experience at the store today! Staff were so helpful and friendly.",Positive,Twitter,RetailChain,2024-01-15 15:30:00,user_109,120,45,USA,
+10,"The food was cold and service was slow. Very disappointing experience.",Negative,Twitter,FoodBrand,2024-01-15 16:00:00,user_110,27,11,UK,
+11,"Had an average meal. Nothing special but nothing terrible either.",Neutral,Facebook,FoodBrand,2024-01-15 16:45:00,user_111,4,0,USA,
+12,"Best burger I've ever had! Absolutely incredible! #foodie #yummy",Positive,Instagram,FoodBrand,2024-01-15 17:30:00,user_112,678,0,Canada,#foodie #yummy
+13,"Their new movie was absolutely breathtaking! Must watch!! #cinema",Positive,Twitter,MediaBrand,2024-01-15 18:00:00,user_113,345,98,USA,#cinema
+14,"Boring movie, predictable plot. Waste of time and money.",Negative,Twitter,MediaBrand,2024-01-15 18:45:00,user_114,22,7,Australia,
+15,"The movie was okay. Some good parts but overall just average.",Neutral,Facebook,MediaBrand,2024-01-15 19:30:00,user_115,6,2,UK,
+16,"Just got my new phone and it's incredible! Best tech purchase of 2024 #tech",Positive,Twitter,TechBrand,2024-01-16 08:00:00,user_116,423,156,India,#tech
+17,"The software keeps crashing. This is completely unacceptable.",Negative,Twitter,TechBrand,2024-01-16 09:00:00,user_117,67,23,USA,
+18,"Update was fine. Didn't notice much difference honestly.",Neutral,Facebook,TechBrand,2024-01-16 10:00:00,user_118,2,0,Germany,
+19,"Incredible sale! Got everything at half price! Love this brand so much! #sale",Positive,Instagram,RetailChain,2024-01-16 11:00:00,user_119,756,0,USA,#sale
+20,"Ordered online but wrong item delivered. Returns process is a nightmare.",Negative,Twitter,RetailChain,2024-01-16 12:00:00,user_120,45,18,Canada,
+21,"Store is clean and well-organized. Decent selection of products.",Neutral,Facebook,RetailChain,2024-01-16 13:00:00,user_121,7,1,UK,
+22,"This meal was pure perfection! Chef's kiss! #foodlover",Positive,Twitter,FoodBrand,2024-01-16 14:00:00,user_122,289,77,Australia,#foodlover
+23,"Found a hair in my food. Absolutely disgusting. Health hazard!",Negative,Twitter,FoodBrand,2024-01-16 15:00:00,user_123,98,42,USA,
+24,"Decent food, reasonable prices. Would come back.",Neutral,Facebook,FoodBrand,2024-01-16 16:00:00,user_124,11,3,India,
+25,"The new album is a masterpiece! Every single track is perfect! #music",Positive,Twitter,MediaBrand,2024-01-16 17:00:00,user_125,567,188,USA,#music
+26,"Concert was cancelled last minute with no refund. Furious!",Negative,Twitter,MediaBrand,2024-01-16 18:00:00,user_126,234,89,UK,
+27,"The show was entertaining enough, had a good time.",Neutral,Facebook,MediaBrand,2024-01-16 19:00:00,user_127,15,4,Canada,
+28,"Wearing this outfit made me feel like a goddess! Total confidence booster! #style",Positive,Instagram,FashionBrand,2024-01-17 08:00:00,user_128,1023,0,USA,#style
+29,"The zipper broke after first wear. Very poor quality for the price.",Negative,Twitter,FashionBrand,2024-01-17 09:00:00,user_129,56,21,Australia,
+30,"Nice design but sizing runs small. Had to exchange.",Neutral,Facebook,FashionBrand,2024-01-17 10:00:00,user_130,9,2,Germany,
+31,"This app is revolutionary! Makes everything so much easier! #innovation",Positive,Twitter,TechBrand,2024-01-17 11:00:00,user_131,378,122,India,#innovation
+32,"Privacy concerns are alarming. Deleting this app immediately.",Negative,Twitter,TechBrand,2024-01-17 12:00:00,user_132,145,67,USA,
+33,"Does what it's supposed to do. Nothing more, nothing less.",Neutral,Facebook,TechBrand,2024-01-17 13:00:00,user_133,4,1,UK,
+34,"Staff went above and beyond! Made my shopping experience magical! #retail",Positive,Twitter,RetailChain,2024-01-17 14:00:00,user_134,201,58,Canada,#retail
+35,"Long queues at checkout. Poor store management during peak hours.",Negative,Twitter,RetailChain,2024-01-17 15:00:00,user_135,33,12,USA,
+36,"Standard shopping experience. Nothing notable.",Neutral,Facebook,RetailChain,2024-01-17 16:00:00,user_136,2,0,Australia,
+37,"This pizza changed my life! Best I've had in 30 years! #pizzalover",Positive,Instagram,FoodBrand,2024-01-17 17:00:00,user_137,892,0,USA,#pizzalover
+38,"Food poisoning after eating here. Stay away from this place!",Negative,Twitter,FoodBrand,2024-01-17 18:00:00,user_138,178,91,India,
+39,"Portion sizes could be bigger for the price but food is decent.",Neutral,Facebook,FoodBrand,2024-01-17 19:00:00,user_139,8,2,UK,
+40,"The documentary made me cry! So powerful and moving! #mustwatch",Positive,Twitter,MediaBrand,2024-01-18 08:00:00,user_140,456,134,Germany,#mustwatch
+41,"Terrible adaptation. Ruined the source material completely.",Negative,Twitter,MediaBrand,2024-01-18 09:00:00,user_141,78,29,USA,
+42,"The series is okay. Gets better after episode 3.",Neutral,Facebook,MediaBrand,2024-01-18 10:00:00,user_142,13,4,Canada,
+43,"These shoes are perfection! Comfortable AND stylish! #shoes #fashion",Positive,Instagram,FashionBrand,2024-01-18 11:00:00,user_143,654,0,Australia,#shoes #fashion
+44,"Color faded after first wash. False advertising!",Negative,Twitter,FashionBrand,2024-01-18 12:00:00,user_144,89,34,USA,
+45,"Average quality for the price. Won't repurchase.",Neutral,Facebook,FashionBrand,2024-01-18 13:00:00,user_145,5,1,UK,
+46,"Blazing fast speeds! This internet service is phenomenal! #broadband",Positive,Twitter,TechBrand,2024-01-18 14:00:00,user_146,267,83,India,#broadband
+47,"Internet keeps disconnecting. Called support 5 times with no resolution.",Negative,Twitter,TechBrand,2024-01-18 15:00:00,user_147,112,48,Germany,
+48,"Service is reliable most of the time. Occasional outages.",Neutral,Facebook,TechBrand,2024-01-18 16:00:00,user_148,6,2,USA,
+49,"Loyalty rewards program is fantastic! Feel so valued as a customer! #loyalty",Positive,Twitter,RetailChain,2024-01-18 17:00:00,user_149,189,56,Canada,#loyalty
+50,"Website crashes every time I try to checkout. Lost my order twice.",Negative,Twitter,RetailChain,2024-01-18 18:00:00,user_150,67,28,UK,

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Social Sentiment Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:       #0f172a;
+      --surface:  #1e293b;
+      --surface2: #273549;
+      --border:   #334155;
+      --text:     #f1f5f9;
+      --muted:    #94a3b8;
+      --pos:      #22c55e;
+      --neg:      #ef4444;
+      --neu:      #f59e0b;
+      --accent:   #6366f1;
+      --radius:   12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── TOP NAV ─────────────────────────────── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: .75rem;
+      font-size: 1.1rem; font-weight: 700; color: var(--text);
+      text-decoration: none;
+    }
+    .nav-brand .icon { font-size: 1.4rem; }
+    .nav-right { display: flex; align-items: center; gap: 1rem; }
+    .badge {
+      font-size: .7rem; padding: .2rem .6rem;
+      border-radius: 999px; font-weight: 600;
+    }
+    .badge-live { background: #052e16; color: var(--pos); border: 1px solid var(--pos); }
+
+    /* ── FLASH MESSAGES ──────────────────────── */
+    .flash-container { padding: .75rem 2rem 0; }
+    .flash {
+      padding: .75rem 1.25rem; border-radius: var(--radius);
+      font-size: .875rem; margin-bottom: .5rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .flash-success { background: #052e16; border: 1px solid var(--pos); color: var(--pos); }
+    .flash-error   { background: #2d0f0f; border: 1px solid var(--neg); color: var(--neg); }
+
+    /* ── LAYOUT ──────────────────────────────── */
+    .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem; }
+
+    /* ── HERO ────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #1e293b 0%, #1a1f3a 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.5rem;
+    }
+    .hero-text h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: .4rem; }
+    .hero-text p  { color: var(--muted); font-size: .9rem; }
+    .hero-text span { color: var(--accent); }
+
+    /* ── UPLOAD CARD ─────────────────────────── */
+    .upload-card {
+      background: var(--surface);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .2s;
+      min-width: 260px;
+    }
+    .upload-card:hover { border-color: var(--accent); }
+    .upload-card label { cursor: pointer; display: block; }
+    .upload-card .upload-icon { font-size: 2rem; margin-bottom: .5rem; }
+    .upload-card p { font-size: .85rem; color: var(--muted); margin-bottom: .75rem; }
+    .upload-card input[type=file] { display: none; }
+    .btn {
+      background: var(--accent); color: white;
+      border: none; border-radius: 8px;
+      padding: .5rem 1.25rem; font-size: .875rem; font-weight: 600;
+      cursor: pointer; transition: opacity .2s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-sm { padding: .35rem .9rem; font-size: .8rem; }
+    .btn-outline {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── STATS GRID ──────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .stat-card .label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .4rem; }
+    .stat-card .value { font-size: 1.9rem; font-weight: 800; line-height: 1; }
+    .stat-card .sub   { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+    .text-pos { color: var(--pos); }
+    .text-neg { color: var(--neg); }
+    .text-neu { color: var(--neu); }
+    .text-accent { color: var(--accent); }
+
+    /* ── SECTION TITLE ───────────────────────── */
+    .section-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .5rem;
+      color: var(--text);
+    }
+
+    /* ── CHART GRID ──────────────────────────── */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .chart-card h3 { font-size: .9rem; color: var(--muted); margin-bottom: 1rem; }
+    .chart-card img {
+      width: 100%; border-radius: 8px;
+      background: #1a2035;
+    }
+    .chart-card .no-data {
+      height: 180px; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: .85rem;
+    }
+
+    /* ── LIVE ANALYZE ────────────────────────── */
+    .analyze-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .analyze-input-row {
+      display: flex; gap: .75rem; flex-wrap: wrap;
+    }
+    .analyze-input-row textarea {
+      flex: 1; min-width: 240px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      padding: .75rem 1rem; font-size: .9rem;
+      resize: vertical; min-height: 70px;
+      font-family: inherit;
+    }
+    .analyze-input-row textarea:focus {
+      outline: none; border-color: var(--accent);
+    }
+    .analyze-result {
+      margin-top: 1rem; display: none;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem;
+    }
+    .result-pill {
+      display: inline-block; padding: .25rem .75rem;
+      border-radius: 999px; font-size: .8rem; font-weight: 700;
+      margin-bottom: .5rem;
+    }
+    .pill-Positive { background: #052e16; color: var(--pos); border: 1px solid var(--pos); }
+    .pill-Negative { background: #2d0f0f; color: var(--neg); border: 1px solid var(--neg); }
+    .pill-Neutral  { background: #422006; color: var(--neu); border: 1px solid var(--neu); }
+    .score-grid { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: .5rem; }
+    .score-item { font-size: .8rem; }
+    .score-item .sk { color: var(--muted); }
+    .score-item .sv { font-weight: 700; }
+
+    /* ── SENTIMENT METER ─────────────────────── */
+    .meter-wrap { margin-top: .75rem; }
+    .meter-label { font-size: .75rem; color: var(--muted); margin-bottom: .25rem; }
+    .meter {
+      height: 8px; border-radius: 999px;
+      background: var(--border); overflow: hidden;
+    }
+    .meter-fill {
+      height: 100%; border-radius: 999px;
+      transition: width .4s ease;
+    }
+
+    /* ── DATA TABLE ──────────────────────────── */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .table-header {
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+    select, input[type=text] {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px;
+      padding: .35rem .75rem; font-size: .8rem;
+    }
+    select:focus, input[type=text]:focus { outline: none; border-color: var(--accent); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th {
+      background: var(--surface2); color: var(--muted);
+      padding: .65rem 1rem; text-align: left;
+      font-size: .72rem; text-transform: uppercase; letter-spacing: .05em;
+      white-space: nowrap;
+    }
+    td {
+      padding: .6rem 1rem; border-top: 1px solid var(--border);
+      color: var(--text); vertical-align: middle;
+    }
+    tr:hover td { background: var(--surface2); }
+    .text-cell { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sent-badge {
+      display: inline-block; padding: .2rem .6rem;
+      border-radius: 999px; font-size: .72rem; font-weight: 700;
+    }
+    .sent-Positive { background: #052e16; color: var(--pos); }
+    .sent-Negative { background: #2d0f0f; color: var(--neg); }
+    .sent-Neutral  { background: #422006; color: var(--neu); }
+    .table-footer {
+      padding: .75rem 1.25rem;
+      font-size: .78rem; color: var(--muted);
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* ── MODEL METRICS ───────────────────────── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: .75rem;
+      margin-bottom: 1.5rem;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      text-align: center;
+    }
+    .metric-card .mk { font-size: .75rem; color: var(--muted); margin-bottom: .3rem; }
+    .metric-card .mv { font-size: 1.5rem; font-weight: 800; }
+
+    /* ── NO DATA STATE ───────────────────────── */
+    .no-data-state {
+      text-align: center; padding: 4rem 2rem;
+    }
+    .no-data-state .nd-icon { font-size: 4rem; margin-bottom: 1rem; opacity: .4; }
+    .no-data-state h2 { font-size: 1.5rem; margin-bottom: .75rem; }
+    .no-data-state p { color: var(--muted); margin-bottom: 1.5rem; font-size: .9rem; }
+
+    /* ── FOOTER ──────────────────────────────── */
+    footer {
+      text-align: center; padding: 2rem;
+      color: var(--muted); font-size: .78rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    /* ── LOADING SPINNER ─────────────────────── */
+    .spinner { display: none; }
+    .spinner.active {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .chart-grid { grid-template-columns: 1fr; }
+      .hero { flex-direction: column; }
+      .container { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="/">
+    <span class="icon">📊</span>
+    Sentiment Dashboard
+  </a>
+  <div class="nav-right">
+    {% if has_data %}
+    <span class="badge badge-live">● LIVE</span>
+    {% endif %}
+    <button class="btn btn-sm btn-outline" onclick="regenerateVisuals()">↻ Refresh Charts</button>
+  </div>
+</nav>
+
+<!-- FLASH -->
+{% if get_flashed_messages() %}
+<div class="flash-container">
+  {% for category, message in get_flashed_messages(with_categories=true) %}
+  <div class="flash flash-{{ category }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Social Media <span>Sentiment Analysis</span></h1>
+      <p>Upload a CSV to analyze public opinion and brand attitudes across platforms.</p>
+      {% if stats.date_range %}<p style="margin-top:.4rem;color:var(--muted)">📅 {{ stats.date_range }}</p>{% endif %}
+    </div>
+
+    <div class="upload-card" id="uploadZone">
+      <form method="POST" action="/upload" enctype="multipart/form-data" id="uploadForm">
+        <label for="csvFile">
+          <div class="upload-icon">📁</div>
+          <p>Drop a CSV or click to browse</p>
+          <input type="file" id="csvFile" name="file" accept=".csv"
+                 onchange="document.getElementById('uploadForm').submit()" />
+          <button type="button" class="btn" onclick="document.getElementById('csvFile').click()">
+            Choose CSV
+          </button>
+        </label>
+      </form>
+    </div>
+  </div>
+
+  {% if has_data %}
+
+  <!-- STATS GRID -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">Total Posts</div>
+      <div class="value text-accent">{{ stats.total_posts }}</div>
+    </div>
+    {% if stats.sentiment_dist.get('Positive') %}
+    <div class="stat-card">
+      <div class="label">Positive</div>
+      <div class="value text-pos">{{ stats.sentiment_dist.Positive.count }}</div>
+      <div class="sub">{{ stats.sentiment_dist.Positive.pct }}% of total</div>
+    </div>
+    {% endif %}
+    {% if stats.sentiment_dist.get('Negative') %}
+    <div class="stat-card">
+      <div class="label">Negative</div>
+      <div class="value text-neg">{{ stats.sentiment_dist.Negative.count }}</div>
+      <div class="sub">{{ stats.sentiment_dist.Negative.pct }}% of total</div>
+    </div>
+    {% endif %}
+    {% if stats.sentiment_dist.get('Neutral') %}
+    <div class="stat-card">
+      <div class="label">Neutral</div>
+      <div class="value text-neu">{{ stats.sentiment_dist.Neutral.count }}</div>
+      <div class="sub">{{ stats.sentiment_dist.Neutral.pct }}% of total</div>
+    </div>
+    {% endif %}
+    {% if stats.platforms %}
+    <div class="stat-card">
+      <div class="label">Platforms</div>
+      <div class="value text-accent">{{ stats.platforms }}</div>
+      {% if stats.top_platform %}<div class="sub">Top: {{ stats.top_platform }}</div>{% endif %}
+    </div>
+    {% endif %}
+    {% if stats.brands %}
+    <div class="stat-card">
+      <div class="label">Brands</div>
+      <div class="value text-accent">{{ stats.brands }}</div>
+      {% if stats.top_brand %}<div class="sub">Most discussed: {{ stats.top_brand }}</div>{% endif %}
+    </div>
+    {% endif %}
+    {% if stats.avg_likes %}
+    <div class="stat-card">
+      <div class="label">Avg Likes</div>
+      <div class="value">{{ stats.avg_likes }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- LIVE ANALYZE -->
+  <div class="analyze-card">
+    <div class="section-title">⚡ Live Text Analyzer</div>
+    <div class="analyze-input-row">
+      <textarea id="analyzeText" placeholder="Type or paste any social media text here to analyze its sentiment…"></textarea>
+      <div style="display:flex;flex-direction:column;gap:.5rem;justify-content:center">
+        <button class="btn" onclick="analyzeText()">
+          Analyze <span class="spinner" id="analyzeSpinner"></span>
+        </button>
+        <button class="btn btn-outline btn-sm" onclick="clearAnalyze()">Clear</button>
+      </div>
+    </div>
+    <div class="analyze-result" id="analyzeResult">
+      <div id="resultSentiment"></div>
+      <div id="resultScores"></div>
+      <div class="meter-wrap">
+        <div class="meter-label">Confidence</div>
+        <div class="meter"><div class="meter-fill" id="confidenceMeter" style="width:0%;background:var(--accent)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 1 -->
+  <div class="section-title">📈 Sentiment Overview</div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Distribution & Counts</h3>
+      {% if visuals.sentiment_distribution %}
+        <img src="{{ visuals.sentiment_distribution }}" alt="Sentiment Distribution" />
+      {% else %}<div class="no-data">Chart not available</div>{% endif %}
+    </div>
+    <div class="chart-card">
+      <h3>Trends Over Time</h3>
+      {% if visuals.trends %}
+        <img src="{{ visuals.trends }}" alt="Trends" />
+      {% else %}<div class="no-data">Not enough time-series data</div>{% endif %}
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="section-title">🏷️ Platform & Brand Analysis</div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Sentiment by Platform</h3>
+      {% if visuals.platform_sentiment %}
+        <img src="{{ visuals.platform_sentiment }}" alt="Platform Sentiment" />
+      {% else %}<div class="no-data">No platform data</div>{% endif %}
+    </div>
+    <div class="chart-card">
+      <h3>Sentiment by Brand / Entity</h3>
+      {% if visuals.brand_sentiment %}
+        <img src="{{ visuals.brand_sentiment }}" alt="Brand Sentiment" />
+      {% else %}<div class="no-data">No brand/entity data</div>{% endif %}
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 3 -->
+  <div class="section-title">☁️ Word Clouds & Hashtags</div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Positive Posts — Top Words</h3>
+      {% if visuals.wordcloud_positive %}
+        <img src="{{ visuals.wordcloud_positive }}" alt="Positive Word Cloud" />
+      {% else %}<div class="no-data">No data</div>{% endif %}
+    </div>
+    <div class="chart-card">
+      <h3>Negative Posts — Top Words</h3>
+      {% if visuals.wordcloud_negative %}
+        <img src="{{ visuals.wordcloud_negative }}" alt="Negative Word Cloud" />
+      {% else %}<div class="no-data">No data</div>{% endif %}
+    </div>
+    <div class="chart-card">
+      <h3>Top Hashtags</h3>
+      {% if visuals.hashtag_analysis %}
+        <img src="{{ visuals.hashtag_analysis }}" alt="Hashtag Analysis" />
+      {% else %}<div class="no-data">No hashtag data</div>{% endif %}
+    </div>
+    <div class="chart-card">
+      <h3>Engagement by Sentiment</h3>
+      {% if visuals.engagement %}
+        <img src="{{ visuals.engagement }}" alt="Engagement" />
+      {% else %}<div class="no-data">No engagement data</div>{% endif %}
+    </div>
+  </div>
+
+  <!-- MODEL METRICS -->
+  {% if metrics %}
+  <div class="section-title">🤖 Model Performance</div>
+  <div class="metrics-grid">
+    {% if metrics.accuracy is defined %}
+    <div class="metric-card">
+      <div class="mk">Overall Accuracy</div>
+      <div class="mv text-accent">{{ "%.1f"|format(metrics.accuracy * 100) }}%</div>
+    </div>
+    {% endif %}
+    {% if metrics.positive_accuracy is defined %}
+    <div class="metric-card">
+      <div class="mk">Positive Acc.</div>
+      <div class="mv text-pos">{{ "%.1f"|format(metrics.positive_accuracy * 100) }}%</div>
+    </div>
+    {% endif %}
+    {% if metrics.negative_accuracy is defined %}
+    <div class="metric-card">
+      <div class="mk">Negative Acc.</div>
+      <div class="mv text-neg">{{ "%.1f"|format(metrics.negative_accuracy * 100) }}%</div>
+    </div>
+    {% endif %}
+    {% if metrics.neutral_accuracy is defined %}
+    <div class="metric-card">
+      <div class="mk">Neutral Acc.</div>
+      <div class="mv text-neu">{{ "%.1f"|format(metrics.neutral_accuracy * 100) }}%</div>
+    </div>
+    {% endif %}
+    {% if metrics.total_samples is defined %}
+    <div class="metric-card">
+      <div class="mk">Samples Evaluated</div>
+      <div class="mv">{{ metrics.total_samples }}</div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- DATA TABLE -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="section-title" style="margin:0">📋 Data Explorer</div>
+      <div class="filter-row">
+        <select id="filterSentiment" onchange="filterTable()">
+          <option value="">All Sentiments</option>
+          <option value="Positive">Positive</option>
+          <option value="Negative">Negative</option>
+          <option value="Neutral">Neutral</option>
+        </select>
+        <select id="filterPlatform" onchange="filterTable()">
+          <option value="">All Platforms</option>
+          {% set platforms = [] %}
+          {% for r in records %}
+            {% if r.platform and r.platform not in platforms %}
+              {% set _ = platforms.append(r.platform) %}
+              <option value="{{ r.platform }}">{{ r.platform }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <input type="text" id="searchText" placeholder="Search text…" oninput="filterTable()" style="width:160px" />
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Post Text</th>
+            <th>Sentiment</th>
+            <th>Predicted</th>
+            <th>Platform</th>
+            <th>Entity</th>
+            <th>Confidence</th>
+            <th>Likes</th>
+            <th>Country</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          {% for r in records %}
+          <tr data-sentiment="{{ r.get('sentiment','') }}"
+              data-platform="{{ r.get('platform','') }}"
+              data-text="{{ r.get('text','') | lower }}">
+            <td style="color:var(--muted)">{{ loop.index }}</td>
+            <td class="text-cell" title="{{ r.get('text','') }}">{{ r.get('text','') }}</td>
+            <td>
+              {% set s = r.get('sentiment','') %}
+              {% if s %}<span class="sent-badge sent-{{ s }}">{{ s }}</span>{% else %}—{% endif %}
+            </td>
+            <td>
+              {% set p = r.get('predicted_sentiment','') %}
+              {% if p %}<span class="sent-badge sent-{{ p }}">{{ p }}</span>{% else %}—{% endif %}
+            </td>
+            <td>{{ r.get('platform','—') }}</td>
+            <td>{{ r.get('entity','—') }}</td>
+            <td>
+              {% set c = r.get('confidence', 0) %}
+              {% if c %}{{ "%.0f"|format(c * 100) }}%{% else %}—{% endif %}
+            </td>
+            <td>{{ r.get('likes','—') }}</td>
+            <td>{{ r.get('country','—') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <span id="tableCount">Showing {{ records|length }} records</span>
+      <span>Last updated: {{ last_updated }}</span>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- NO DATA STATE -->
+  <div class="no-data-state">
+    <div class="nd-icon">🔍</div>
+    <h2>No Data Loaded</h2>
+    <p>Upload a CSV file with social media posts to begin your sentiment analysis.</p>
+    <p style="font-size:.8rem;color:var(--muted)">Expected columns: <code>text</code>, <code>sentiment</code>, <code>platform</code>, <code>entity</code>, <code>timestamp</code>, <code>likes</code>, <code>retweets</code></p>
+    <button class="btn" style="margin-top:1rem" onclick="document.getElementById('csvFile').click()">
+      📁 Upload CSV
+    </button>
+  </div>
+  {% endif %}
+
+</div>
+
+<footer>
+  Social Media Sentiment Analysis Dashboard &nbsp;·&nbsp;
+  Built with Flask + VADER + TextBlob &nbsp;·&nbsp;
+  <a href="/api/data" style="color:var(--accent);text-decoration:none" target="_blank">API</a>
+</footer>
+
+<script>
+// ── LIVE ANALYZE ─────────────────────────────────────────────────────────────
+async function analyzeText() {
+  const text = document.getElementById('analyzeText').value.trim();
+  if (!text) return;
+
+  const spinner = document.getElementById('analyzeSpinner');
+  spinner.classList.add('active');
+
+  try {
+    const res = await fetch('/analyze', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({text})
+    });
+    const data = await res.json();
+
+    const sentEl = document.getElementById('resultSentiment');
+    const scoresEl = document.getElementById('resultScores');
+    const meter = document.getElementById('confidenceMeter');
+    const resultBox = document.getElementById('analyzeResult');
+
+    sentEl.innerHTML = `<span class="result-pill pill-${data.sentiment}">${data.sentiment}</span>`;
+    scoresEl.innerHTML = `
+      <div class="score-grid">
+        <div class="score-item"><span class="sk">VADER Compound: </span><span class="sv">${data.vader_compound}</span></div>
+        <div class="score-item"><span class="sk">TextBlob Polarity: </span><span class="sv">${data.textblob_polarity}</span></div>
+        <div class="score-item"><span class="sk">Subjectivity: </span><span class="sv">${data.textblob_subjectivity}</span></div>
+        <div class="score-item"><span class="sk">Confidence: </span><span class="sv">${Math.round(data.confidence * 100)}%</span></div>
+      </div>`;
+
+    const meterColor = data.sentiment === 'Positive' ? 'var(--pos)'
+                     : data.sentiment === 'Negative' ? 'var(--neg)' : 'var(--neu)';
+    meter.style.width = (data.confidence * 100) + '%';
+    meter.style.background = meterColor;
+
+    resultBox.style.display = 'block';
+  } catch (e) {
+    alert('Error analyzing text: ' + e.message);
+  } finally {
+    spinner.classList.remove('active');
+  }
+}
+
+function clearAnalyze() {
+  document.getElementById('analyzeText').value = '';
+  document.getElementById('analyzeResult').style.display = 'none';
+}
+
+document.getElementById('analyzeText')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.ctrlKey) analyzeText();
+});
+
+// ── TABLE FILTER ─────────────────────────────────────────────────────────────
+function filterTable() {
+  const sentFilter = document.getElementById('filterSentiment').value;
+  const platFilter = document.getElementById('filterPlatform').value;
+  const textFilter = document.getElementById('searchText').value.toLowerCase();
+  const rows = document.querySelectorAll('#tableBody tr');
+  let visible = 0;
+
+  rows.forEach(row => {
+    const sent = row.dataset.sentiment;
+    const plat = row.dataset.platform;
+    const text = row.dataset.text;
+
+    const ok = (!sentFilter || sent === sentFilter)
+            && (!platFilter || plat === platFilter)
+            && (!textFilter || text.includes(textFilter));
+
+    row.style.display = ok ? '' : 'none';
+    if (ok) visible++;
+  });
+
+  document.getElementById('tableCount').textContent = `Showing ${visible} records`;
+}
+
+// ── REGENERATE VISUALS ────────────────────────────────────────────────────────
+async function regenerateVisuals() {
+  try {
+    const res = await fetch('/api/regenerate', {method: 'POST'});
+    const data = await res.json();
+    if (data.success) {
+      location.reload();
+    } else {
+      alert('Error: ' + (data.error || 'Unknown'));
+    }
+  } catch (e) {
+    alert('Error regenerating visuals');
+  }
+}
+
+// ── DRAG-DROP UPLOAD ──────────────────────────────────────────────────────────
+const zone = document.getElementById('uploadZone');
+if (zone) {
+  zone.addEventListener('dragover', e => {
+    e.preventDefault(); zone.style.borderColor = 'var(--accent)';
+  });
+  zone.addEventListener('dragleave', () => {
+    zone.style.borderColor = 'var(--border)';
+  });
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.style.borderColor = 'var(--border)';
+    const file = e.dataTransfer.files[0];
+    if (file && file.name.endsWith('.csv')) {
+      const input = document.getElementById('csvFile');
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      input.files = dt.files;
+      document.getElementById('uploadForm').submit();
+    }
+  });
+}
+</script>
+</body>
+</html>
